@@ -5,6 +5,13 @@
  */
 package bam;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
 /**
  *
  * @author lenovo
@@ -12,13 +19,111 @@ package bam;
 public class ScoreTab {
     public int travellers[][] = new int[BAM.tbls*2][7];
     public String recap[][] = new String[BAM.tbls + 2][BAM.tbls *2 + 4];
-    public String raw[][] = new String[BAM.tbls * 14 * 2][5]; //NS, EW, Contract, By, Tricks
+    //public static String raw[][] = new String[BAM.tbls * 14 * 2 + 100][8]; //ID, Board, NS, EW, Contract, By, Tricks, NS Score
+    public static int id[]; 
+    public static int level[];    
+    public static int pairns[];    
+    public static int pairew[];    
+    public static String contract[];
+    public static String strain[];
+    public static String made[];
+    public static String decl[];
+    public static String dblstr[];
+    public static int board[];
+    public static int nsscore[];
     
-    
-    public static void Score() {
+    public static void ScoreTab() {
+        try{
+            retrieveScores();
         
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
         
     }    
+    
+    public static void retrieveScores() throws ClassNotFoundException, SQLException{
+        //NOT TESTED
+        try{
+            Connection conn =DriverManager.getConnection("jdbc:ucanaccess://C:\\Users\\lenovo\\Documents\\dchbam.bws;memory=true");
+            ResultSet rs;
+            PreparedStatement ps = null;
+            Statement st =conn.createStatement();
+            String query;
+            String str[];           
+            int size = 0;
+            
+            query = "Select count(*) from ReceivedData";
+            ps = conn.prepareStatement(query);
+            rs = ps.executeQuery();
+            while(rs.next()) {
+            size = Integer.parseInt(rs.getString("count(*)"));
+            }
+            
+            id = new int[size];
+            pairns = new int[size];
+            pairew = new int[size];
+            board = new int[size];
+            level = new int[size];
+            nsscore = new int[size];
+            contract = new String[size];
+            decl = new String[size];
+            dblstr = new String[size];
+            made = new String[size];
+            strain = new String[size];
+                        
+            
+            query = "Select ID, Board, PairNS, PairEW, Contract, NS/EW, Result from ReceivedData";
+            ps = conn.prepareStatement(query);
+            rs = ps.executeQuery();
+            
+            int i = 0;
+            while (rs.next()){
+                id[i] = rs.getInt("ID");
+                board[i] = rs.getInt("Board");
+                pairns[i] = rs.getInt("PairNS");
+                pairew[i] = rs.getInt("PairEW");
+                contract[i] = rs.getString("Contract");
+                decl[i] = rs.getString("NS/EW"); 
+                made[i] = rs.getString("Result");                
+                i++;
+            }
+            
+            for(i = 0; i < size; i++){
+                str = contract[i].split(" ");
+                if (str.length == 1){
+                    level[i] = 0;
+                    strain[i] = "";
+                    dblstr[i] = "";
+                }
+                else if (str.length == 2) {
+                    level[i] = Integer.parseInt(str[1]);
+                    strain[i] = str[2];
+                    dblstr[i] = ""; 
+                }
+                else {
+                    level[i] = Integer.parseInt(str[1]);
+                    strain[i] = str[2];
+                    dblstr[i] = str[3];
+                }
+                
+                //(int level, String strain, String made, String decl, String dblstr, int board)
+                nsscore[i] = calculateRawScore(level[i], strain[i], made[i], decl[i], dblstr[i], board[i]);
+                               
+            }
+                
+        
+            conn.close();
+            
+        }
+        catch (Exception e) {
+			e.printStackTrace();
+	}
+
+        
+    }
+    
     
     public static void createReports() {
         String td = "</td><td>";
@@ -34,6 +139,7 @@ public class ScoreTab {
         
     }
     public static int calculateRawScore(int level, String strain, String made, String decl, String dblstr, int board){
+        //tested := OK
         int[] vultable = {1,0,2,1,3,2,1,3,0,1,3,0,2,3,0,2,1};
         int denom;
         int dbl = 0;
@@ -100,20 +206,13 @@ public class ScoreTab {
                score = score * 4;
        }
 
-
-
-
        if (score < 100){
                score += 50; //partial
-
        }
        else {
-               if (vul==1){
-                       score += 500;
-               }
-               else {
-                       score += 300;
-               }
+               if (vul==1)score += 500;
+               else score += 300;
+               
            if (level == 6){
                    if (vul==1){
                    score += 750;
@@ -131,10 +230,7 @@ public class ScoreTab {
                }
             }
        }
-
-
-
-
+       
        if(dbl==0){
                score += ot * unit;
        }
