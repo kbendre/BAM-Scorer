@@ -41,7 +41,7 @@ public class NamesTab {
         String str1, str2;
         
         k = BAM.tbls;
-        j = k/2;
+        j = (k%2 == 0) ? k/2 : k/2 + 1;
         TextField[] fields = new TextField[k+1];
         
         for (i=1; i <= j; i++){
@@ -74,16 +74,18 @@ public class NamesTab {
         HBox hbBtn = new HBox(10);
         hbBtn.setAlignment(Pos.BOTTOM_RIGHT);
         hbBtn.getChildren().add(btn);
-        grid.add(hbBtn, 4, j+2);
+        grid.add(hbBtn, 4, j+1);
         btn.setOnAction(new EventHandler<ActionEvent>() {
 
             @Override
             public void handle(ActionEvent event) {
-                ObservableList<Node> list  = grid.getChildren();
+                //ObservableList<Node> list  = grid.getChildren();
                 for (int i = 1; i < BAM.tbls; i++){
                     BAM.teamnames[i] = fields[i].getText();
                 }
-                //System.out.println(list);
+                int namesentered = 0;
+                for(int i = 0; i < BAM.tbls; i++) if ( BAM.teamnames[i] != null) namesentered++;
+                ScoreTab.namesText.setText(namesentered + "/" + BAM.tbls + " names entered.");
             }
         });
         return grid;
