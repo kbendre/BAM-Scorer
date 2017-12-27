@@ -5,20 +5,39 @@
  */
 package bam;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDate;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.control.Button;
+import javafx.scene.control.DatePicker;
+import javafx.scene.control.Label;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
+import javafx.stage.DirectoryChooser;
 
 /**
  *
- * @author lenovo
+ * @author Kaustubh Bendre
  */
 public class ScoreTab {
-    public int travellers[][] = new int[BAM.tbls*2][7];
-    public String recap[][] = new String[BAM.tbls + 2][BAM.tbls *2 + 4];
+    public static int travellers[][] = new int[BAM.tbls*2][7]; 
+    public static int recap[][] = new int[BAM.tbls + 2][BAM.tbls *2 + 4];// 0 - blank, 1-tbls = teams, checksum // 0 - team no., 1-bds = bd no, name, total, rank
     //public static String raw[][] = new String[BAM.tbls * 14 * 2 + 100][8]; //ID, Board, NS, EW, Contract, By, Tricks, NS Score
     public static int id[]; 
     public static int level[];    
@@ -30,21 +49,89 @@ public class ScoreTab {
     public static String decl[];
     public static String dblstr[];
     public static int board[];
+    public static int round[];
     public static int nsscore[];
+    public static int nsmp[];
+    public static String compar[]; //for debugging
     
-    public static void ScoreTab() {
-        try{
-            retrieveScores();
+    public static int noofScores = BAM.tbls * 28;
+    public static Text namesText;
+    
+    public static GridPane ScoreTab () {
+        GridPane grid = new GridPane();
+        grid.setAlignment(Pos.TOP_LEFT);
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(25, 25, 25, 25));
+
         
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
+        Text scenetitle = new Text("Score and create reports:");
+        scenetitle.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
+        grid.add(scenetitle, 0, 0, 2, 1);
+
+        
+        
+        
+        Button retbtn = new Button();
+        retbtn.setText("Retrieve from BM");
+        grid.add(retbtn, 0, 1);
+        
+        Text retText = new Text();
+        retText.setText("0/" + noofScores + " scores retrieved.");
+        grid.add(retText, 0, 2);
+        
+        namesText = new Text();
+        int namesentered = 0;
+        for(int i = 0; i < BAM.tbls; i++) if ( BAM.teamnames[i] != null) namesentered++;
+        namesText.setText(namesentered + "/" + BAM.tbls + " names entered.");
+        grid.add(namesText, 0, 3);
+        
+        retbtn.setOnAction(new EventHandler<ActionEvent>(){
+            @Override
+            public void handle(ActionEvent event) {
+                int ret = 0;
+                try{
+                ret = retrieveScores();
+                ret = ret - removeDuplicates();                
+                retText.setText(ret + "/" + noofScores + " scores retrieved.");
+                
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                } 
+            }
+        });
+        
+  
+        Button btn = new Button();
+        btn.setText("Score");
+        HBox hbBtn = new HBox(10);
+        hbBtn.setAlignment(Pos.BOTTOM_RIGHT);
+        hbBtn.getChildren().add(btn);
+        grid.add(hbBtn, 0,5 );
+        btn.setOnAction(new EventHandler<ActionEvent>() {
+
+            @Override
+            public void handle(ActionEvent event) {
+                try{
+           
+                    createRecap();
+            //System.out.println("recap done");
+                    createReports();
+           // System.out.println("reports done");
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        return grid;
+        
         
     }    
     
-    public static void retrieveScores() throws ClassNotFoundException, SQLException{
-        //NOT TESTED
+    public static int retrieveScores() throws ClassNotFoundException, SQLException{
+        int size = 0;
         try{
             Connection conn =DriverManager.getConnection("jdbc:ucanaccess://C:\\Users\\lenovo\\Documents\\dchbam.bws;memory=true");
             ResultSet rs;
@@ -52,13 +139,13 @@ public class ScoreTab {
             Statement st =conn.createStatement();
             String query;
             String str[];           
-            int size = 0;
+            
             
             query = "Select count(*) from ReceivedData";
             ps = conn.prepareStatement(query);
             rs = ps.executeQuery();
             while(rs.next()) {
-            size = Integer.parseInt(rs.getString("count(*)"));
+            size = Integer.parseInt(rs.getString(1));
             }
             
             id = new int[size];
@@ -67,6 +154,8 @@ public class ScoreTab {
             board = new int[size];
             level = new int[size];
             nsscore = new int[size];
+            nsmp = new int[size];
+            round = new int[size];
             contract = new String[size];
             decl = new String[size];
             dblstr = new String[size];
@@ -74,7 +163,7 @@ public class ScoreTab {
             strain = new String[size];
                         
             
-            query = "Select ID, Board, PairNS, PairEW, Contract, NS/EW, Result from ReceivedData";
+            query = "Select ID, Board, PairNS, PairEW, Contract, [NS/EW], Result from ReceivedData";
             ps = conn.prepareStatement(query);
             rs = ps.executeQuery();
             
@@ -98,14 +187,14 @@ public class ScoreTab {
                     dblstr[i] = "";
                 }
                 else if (str.length == 2) {
-                    level[i] = Integer.parseInt(str[1]);
-                    strain[i] = str[2];
+                    level[i] = Integer.parseInt(str[0]);
+                    strain[i] = str[1];
                     dblstr[i] = ""; 
                 }
                 else {
-                    level[i] = Integer.parseInt(str[1]);
-                    strain[i] = str[2];
-                    dblstr[i] = str[3];
+                    level[i] = Integer.parseInt(str[0]);
+                    strain[i] = str[1];
+                    dblstr[i] = str[2];
                 }
                 
                 //(int level, String strain, String made, String decl, String dblstr, int board)
@@ -121,25 +210,159 @@ public class ScoreTab {
 			e.printStackTrace();
 	}
 
-        
+        return size;
     }
     
+    public static void createRecap(){
+        int size = nsscore.length;
+        int diff = 0;
+        
+        compar = new String[size];
+        
+        for(int i=0; i< size; i++){
+            int j = i+1;
+            
+            if (nsmp[i] == 0 && pairns[i] > 0) {
+                while(j < size && (pairns[i] != pairew[j] || board[i] != board[j] || pairns[j] < 0) ) j++;
+                if (j < size){
+                    diff = nsscore[i] - nsscore[j];
+                    compar[i] =  id[i] + "~" + id[j] + "  " + diff; // debug
+                    compar[j] =  id[j] + "~" + id[i] + "  " + diff*-1; // debug
+                    if (diff < -190){
+                        nsmp[i] = 0;
+                        nsmp[j] = 6;
+                    }
+                    else if (diff < -50) {
+                        nsmp[i] = 1;
+                        nsmp[j] = 5;
+                    }
+                    else if (diff < -10) {
+                        nsmp[i] = 2;
+                        nsmp[j] = 4;
+                    }
+                    else if (diff < 20) {
+                        nsmp[i] = 3;
+                        nsmp[j] = 3;
+                    }
+                    else if (diff < 60) {
+                        nsmp[i] = 4;
+                        nsmp[j] = 2;
+                    }
+                    else if (diff < 200) {
+                        nsmp[i] = 5;
+                        nsmp[j] = 1;
+                    }
+                    else {
+                        nsmp[i] = 6;
+                        nsmp[j] = 0;
+                    }
+                    recap[pairns[i]][board[i]] = nsmp[i];
+                    recap[pairns[j]][board[j]] = nsmp[j];
+                }
+            }
+            //System.out.println(id[i]);
+            
+        }
+        
+        int total;
+        int totaly = BAM.tbls * 2 + 2;
+        int rank;
+        int ranky = totaly + 1;
+        int namey = totaly - 1;
+        for(int i = 1; i <= BAM.tbls ; i++){
+            total = 0;
+            for(int j = 1; j <= BAM.tbls*2 ; j++){
+                total += recap[i][j];
+            }
+            recap[i][0] = i;
+            recap[i][totaly] = total;
+            //recap[i][namey] = BAM.teamnames[i];            
+        }
+        for(int i = 1; i <= BAM.tbls; i++){
+            rank = 1;
+            for (int j = 1; j <= BAM.tbls; j++){
+                if(recap[i][totaly] < recap[j][totaly]) rank++ ;
+            }
+            recap[i][ranky] = rank;
+        }
+        
+        ///sort by rank
+        //int[][] copy = recap;
+        
+        
+        
+        
+        //////////
+    }
     
-    public static void createReports() {
+    public static void createReports() throws IOException {
         String td = "</td><td>";
-        String trtd = "<tr><td>";
-        String tdtr = "</td></tr>";
+        String row = "<tr><td>";
+        String rowend = "</td></tr>";
+        File f;
+        f=new File("d:\\test.htm");  
+        String strLine, str = "Hi";
+        
+        str = "<html><style> table, th, td { border-collapse: collapse; border: 1px solid black; } </style> <table>";
+        int max_y = BAM.tbls * 2 + 4;
+        int max_x = BAM.tbls; 
+        //int max_x = nsscore.length;
+        try{
+            f.createNewFile();  
+            for(int i = 1; i< max_x; i++){
+                str += row + BAM.teamnames[i];
+                for(int j = 1; j < max_y; j++){
+                    str += td + recap[i][j];
+                }
+                //str += row + id[i] + td + pairns[i] + td + pairew[i] + td + nsscore[i] + td + nsmp[i] + td + compar[i];
+                str += rowend;
+            }
+            
+            
+            
+            str += "</table></html>";
+            FileWriter fr = new FileWriter(f);
+            fr.write(str);
+            
+            fr.close();
+        }
+        
+        catch (Exception e){
+	  e.printStackTrace();
+        }
         
         
+    }    
+    
+    public static int removeDuplicates(){
+        int dups = 0;
+        int size = nsscore.length;
         
+        for(int i = 0; i < size; i++){
+            for(int j = i+1; j < size; j++){
+                if(pairns[i] > 0 && pairns[i] == pairns[j] && pairew[i] == pairew[j] && board[i] == board[j]){
+                    if(id[i] > id[j]){ // keep only the latest entry
+                        pairns[j] = -1;
+                        pairew[j] = -1; 
+                        board[j] = -1;
+                        dups += 1;
+                    }
+                    else{
+                        pairns[i] = -1;
+                        pairew[i] = -1;
+                        board[i] = -1;
+                        dups += 1;
+                        j = size; //exit inside for loop
+                    }
+                }
+            }
+        }
+       
+        return dups;
     }
     
-    
-    public static void removeDuplicates(){
-        
-    }
     public static int calculateRawScore(int level, String strain, String made, String decl, String dblstr, int board){
-        //tested := OK
+        
         int[] vultable = {1,0,2,1,3,2,1,3,0,1,3,0,2,3,0,2,1};
         int denom;
         int dbl = 0;
@@ -147,6 +370,7 @@ public class ScoreTab {
         int NSScoreconverter;
         int ot;
         int score = 0;
+        board = board%16;
         
        //////// dbl        
         if ("x".equals(dblstr)) dbl = 1;
@@ -178,7 +402,7 @@ public class ScoreTab {
             
             if (dbl == 0) return (vul == 0) ? ot * 50 * NSScoreconverter : ot * 100 * NSScoreconverter ;
             
-            if (vul == 0) score = (ot < 3) ? ((ot + 3) * 300) - 500 : (ot * 200) + 100;
+            if (vul == 0) score = (ot < -3) ? ((ot + 3) * 300) - 500 : (ot * 200) + 100;
             else score = ot * 300 + 100;
             score *= NSScoreconverter;
             return (dbl == 1) ? score : score * 2;
@@ -244,6 +468,6 @@ public class ScoreTab {
        }
 
 
-       return score;
+       return score*NSScoreconverter;
    }
 }
