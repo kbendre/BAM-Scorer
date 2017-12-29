@@ -56,10 +56,10 @@ public class SetTab {
             @Override
             public void handle(ActionEvent event)  {
                 try{
-              //  DB.initiateDB();
+                DB.initiateDB();
                    
-              //  Process process = new ProcessBuilder("C:\\Program Files (x86)\\Bridgemate Pro\\BMPro.exe" ,"/f:[C:\\Users\\lenovo\\Documents\\dchbam.bws]").start();
-                ScoreTab.ScoreTab();
+                Process process = new ProcessBuilder("C:\\Program Files (x86)\\Bridgemate Pro\\BMPro.exe" ,"/f:[C:\\Users\\lenovo\\Documents\\dchbam.bws]").start();
+              //  ScoreTab.ScoreTab();
                 
                 }
                 catch (Exception e) {

@@ -1,16 +1,10 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package bam;
 
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -57,8 +51,7 @@ public class NamesTab {
             field.setText(BAM.teamnames[i]);
         }
         for (i=j+1; i <= k; i++){
-            str1 = "Team " + i;
-            //str2 = "namestabLabel" + i;
+            str1 = "Team " + i;           
             
             Label label = new Label(str1);
             grid.add(label, 3, i-j);

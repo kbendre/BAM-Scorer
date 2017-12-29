@@ -1,8 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package bam;
 
 import java.net.InetAddress;
@@ -22,10 +18,8 @@ public class DB {
     public static void initiateDB() throws ClassNotFoundException, SQLException{
         
         try{
-            Connection conn =DriverManager.getConnection("jdbc:ucanaccess://C:\\Users\\lenovo\\Documents\\dchbam.bws;memory=true");
-            ResultSet rs;
+            Connection conn =DriverManager.getConnection("jdbc:ucanaccess://C:\\Users\\lenovo\\Documents\\dchbam.bws;memory=true");           
             PreparedStatement ps = null;
-            Statement st =conn.createStatement();
             String query;
             
             ClearDB(conn);
@@ -51,15 +45,8 @@ public class DB {
             ps.execute();
             }
             
-            uploadRoundData(conn);
+            uploadRoundData(conn);      
             
-           // uploadSettings(conn);
-           
-           
-            
-            //String str = "No Go";
-            //if(rs.next()) str = rs.getString(2);
-            System.out.println(ComputerName);
         }
         catch (Exception e) {
 			e.printStackTrace();
@@ -147,7 +134,7 @@ public class DB {
         int rndno,tblno,ns,ew,lo,hi,trndno;
         int row;
         String query;
-        PreparedStatement ps = null;
+        PreparedStatement ps;
         bds = tbls * 2;
     roundtable = new int[tbls*rnds+1][6];// rows start from 1, cols start from 0    
     
@@ -192,42 +179,32 @@ public class DB {
         
          for(rndno=1; rndno < 8; rndno++){
             for(tblno=1; tblno <= tbls; tblno++){
-                if(rndno < 8) trndno = rndno;
-                else trndno = rndno + (tbls - 15);
-                //row = (rndno-1)*14 + tblno;
-
+                
                 roundtable[row][0] = rndno;
                 roundtable[max - row][0] = 15 - rndno;
                 roundtable[row][1] = tblno;
-               // roundtable[max - row][1] = tblno;
-
+              
                 //NS number (same as table number)
                 roundtable[row][2] = tblno;
 
                 //EW number
                 if(rndno < 4){
-                    ew = tblno - (2*trndno);
-                    while (ew < 1) ew = ew + tbls;
-                }
-                else if(rndno < 12){
-                    ew = tblno - (2*trndno) - 1;
+                    ew = tblno - (2*rndno);
                     while (ew < 1) ew = ew + tbls;
                 }
                 else {
-                    ew = tblno - (2*trndno) - 2;
+                    ew = tblno - (2*rndno) - 1;
                     while (ew < 1) ew = ew + tbls;
                 }
+                
                 roundtable[row][3] = ew;
                 
                 roundtable[max-row][3] = tblno;
                 roundtable[max-row][2] = ew;
-                roundtable[max - row][1] = ew;
+                roundtable[max-row][1] = ew;
 
                 //Low Board, High Board
-                hi = (tblno - trndno) * 2;
-                
-                if(rndno > 11) hi = hi - 4;
-                
+                hi = (tblno - rndno) * 2;
                 while (hi <= 0) hi = hi + (tbls * 2);
                 while (hi > tbls*2) hi = hi - (tbls * 2);    
                     
@@ -242,15 +219,20 @@ public class DB {
          }            
     }
     try{
-    
-        for(int i=1; i<tbls*rnds+1; i++){
-            query = "Insert into RoundData (Section, Table, Round, NSPair, EWPair, LowBoard, HighBoard) Values ('1','" 
+        query = "Insert into RoundData (Section, Table, Round, NSPair, EWPair, LowBoard, HighBoard) Values ";
+        for(int i=1; i<tbls*rnds; i++){
+            query += "('1','" 
                     + roundtable[i][1] + "','" + roundtable[i][0] + "','" + roundtable[i][2] + "','" 
-                    + roundtable[i][3] + "','" + roundtable[i][4] + "','" + roundtable[i][5] + "')";
-                    
+                    + roundtable[i][3] + "','" + roundtable[i][4] + "','" + roundtable[i][5] + "'), "; //note the comma at the end
+        }  
+        int i = tbls*rnds; //last iteration done outside loop to remove the comma at the end.
+        query += "('1','" 
+                    + roundtable[i][1] + "','" + roundtable[i][0] + "','" + roundtable[i][2] + "','" 
+                    + roundtable[i][3] + "','" + roundtable[i][4] + "','" + roundtable[i][5] + "')"; //no comma at the end
+        
             ps = conn.prepareStatement(query);
             ps.execute();
-        }           
+                   
     }
     catch (Exception e) {
 			e.printStackTrace();

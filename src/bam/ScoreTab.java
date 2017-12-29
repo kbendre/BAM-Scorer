@@ -14,22 +14,16 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.time.LocalDate;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
-import javafx.scene.control.DatePicker;
-import javafx.scene.control.Label;
-import javafx.scene.control.Spinner;
-import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
-import javafx.stage.DirectoryChooser;
 
 /**
  *
@@ -52,7 +46,7 @@ public class ScoreTab {
     public static int round[];
     public static int nsscore[];
     public static int nsmp[];
-    public static String compar[]; //for debugging
+    //public static String compar[]; //for debugging
     
     public static int noofScores = BAM.tbls * 28;
     public static Text namesText;
@@ -63,14 +57,10 @@ public class ScoreTab {
         grid.setHgap(10);
         grid.setVgap(10);
         grid.setPadding(new Insets(25, 25, 25, 25));
-
         
         Text scenetitle = new Text("Score and create reports:");
         scenetitle.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
-        grid.add(scenetitle, 0, 0, 2, 1);
-
-        
-        
+        grid.add(scenetitle, 0, 0, 2, 1);      
         
         Button retbtn = new Button();
         retbtn.setText("Retrieve from BM");
@@ -93,16 +83,14 @@ public class ScoreTab {
                 try{
                 ret = retrieveScores();
                 ret = ret - removeDuplicates();                
-                retText.setText(ret + "/" + noofScores + " scores retrieved.");
-                
+                retText.setText(ret + "/" + noofScores + " scores retrieved.");                
                 }
                 catch (Exception e) {
                     e.printStackTrace();
                 } 
             }
         });
-        
-  
+          
         Button btn = new Button();
         btn.setText("Score");
         HBox hbBtn = new HBox(10);
@@ -113,12 +101,9 @@ public class ScoreTab {
 
             @Override
             public void handle(ActionEvent event) {
-                try{
-           
-                    createRecap();
-            //System.out.println("recap done");
-                    createReports();
-           // System.out.println("reports done");
+                try{           
+                    createRecap();           
+                    createReports();           
                 }
                 catch (Exception e) {
                     e.printStackTrace();
@@ -138,8 +123,7 @@ public class ScoreTab {
             PreparedStatement ps = null;
             Statement st =conn.createStatement();
             String query;
-            String str[];           
-            
+            String str[];                       
             
             query = "Select count(*) from ReceivedData";
             ps = conn.prepareStatement(query);
@@ -195,16 +179,12 @@ public class ScoreTab {
                     level[i] = Integer.parseInt(str[0]);
                     strain[i] = str[1];
                     dblstr[i] = str[2];
-                }
+                }          
                 
-                //(int level, String strain, String made, String decl, String dblstr, int board)
-                nsscore[i] = calculateRawScore(level[i], strain[i], made[i], decl[i], dblstr[i], board[i]);
-                               
-            }
-                
+                nsscore[i] = calculateRawScore(level[i], strain[i], made[i], decl[i], dblstr[i], board[i]);                               
+            }           
         
-            conn.close();
-            
+            conn.close();            
         }
         catch (Exception e) {
 			e.printStackTrace();
@@ -217,7 +197,7 @@ public class ScoreTab {
         int size = nsscore.length;
         int diff = 0;
         
-        compar = new String[size];
+       // compar = new String[size];
         
         for(int i=0; i< size; i++){
             int j = i+1;
@@ -226,8 +206,8 @@ public class ScoreTab {
                 while(j < size && (pairns[i] != pairew[j] || board[i] != board[j] || pairns[j] < 0) ) j++;
                 if (j < size){
                     diff = nsscore[i] - nsscore[j];
-                    compar[i] =  id[i] + "~" + id[j] + "  " + diff; // debug
-                    compar[j] =  id[j] + "~" + id[i] + "  " + diff*-1; // debug
+                  //  compar[i] =  id[i] + "~" + id[j] + "  " + diff; // debug
+                  //  compar[j] =  id[j] + "~" + id[i] + "  " + diff*-1; // debug
                     if (diff < -190){
                         nsmp[i] = 0;
                         nsmp[j] = 6;
@@ -380,14 +360,12 @@ public class ScoreTab {
       ///////// declarer, vul  
         if("N".equals(decl) || "S".equals(decl)){
             if (vultable[board] == 0 || vultable[board] == 1) vul = 0;
-            else vul = 1;
-            
+            else vul = 1;            
             NSScoreconverter = 1;
         }
         else{
             if (vultable[board] == 0 || vultable[board] == 2) vul = 0;
-            else vul = 1;
-            
+            else vul = 1;            
             NSScoreconverter = -1;
         }
         ////////// overtricks
@@ -398,76 +376,55 @@ public class ScoreTab {
         else ot = Integer.parseInt(made.substring(1));
         
         /////////// contract going down
-        if (ot < 0){
-            
+        if (ot < 0){            
             if (dbl == 0) return (vul == 0) ? ot * 50 * NSScoreconverter : ot * 100 * NSScoreconverter ;
             
             if (vul == 0) score = (ot < -3) ? ((ot + 3) * 300) - 500 : (ot * 200) + 100;
             else score = ot * 300 + 100;
             score *= NSScoreconverter;
-            return (dbl == 1) ? score : score * 2;
-           
-        }
-        
+            return (dbl == 1) ? score : score * 2;           
+        }        
         
         /////////// contract made
         
         if ("C".equals(strain) || "D".equals(strain)) denom = 1;
         else if ("H".equals(strain) || "S".equals(strain)) denom = 3;
-        else denom = 5;
-        
+        else denom = 5;        
        
-       int unit = 30; // majors + NT
-       if (denom < 3) unit = 20; //minors
+        int unit = 30; // majors + NT
+        if (denom < 3) unit = 20; //minors
 
-       score = unit * level; 
-       if (denom == 5) score += 10; //NT
+        score = unit * level; 
+        if (denom == 5) score += 10; //NT
 
-       if(dbl == 1){
-               score = score * 2;
-       }
-       else if(dbl == 2){
-               score = score * 4;
-       }
+        if(dbl == 1) score = score * 2;
+        else if(dbl == 2) score = score * 4;
 
-       if (score < 100){
-               score += 50; //partial
-       }
-       else {
-               if (vul==1)score += 500;
-               else score += 300;
-               
-           if (level == 6){
-                   if (vul==1){
-                   score += 750;
-                }
-                        else {
-                   score += 500;
-                }
-           }
-            if (level == 7){
-               if (vul==1){
-               score += 1500;
-               }
-                    else {
-               score += 1000;
-               }
-            }
-       }
-       
-       if(dbl==0){
-               score += ot * unit;
-       }
-       else if(dbl == 1){
-               score += ot * 2 * (1+vul) * 50;
-               score += 50;
-       }
-       else if(dbl == 2){
-               score += ot * 4 * (1+vul) * 50;
-               score += 100;	
-       }
+        if (score < 100) score += 50; //partial
+        else {
+             if (vul==1) score += 500;
+             else score += 300;
 
+             if (level == 6){
+                 if (vul==1)score += 750;
+                 else score += 500;
+             }
+             if (level == 7){
+                 if (vul==1)score += 1500;
+                 else score += 1000;
+             }
+        }
 
-       return score*NSScoreconverter;
+        if(dbl==0)score += ot * unit;
+        else if(dbl == 1){
+                score += ot * 2 * (1+vul) * 50;
+                score += 50;
+        }
+        else if(dbl == 2){
+                score += ot * 4 * (1+vul) * 50;
+                score += 100;	
+        }
+
+        return score*NSScoreconverter;
    }
 }
