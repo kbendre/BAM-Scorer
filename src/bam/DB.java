@@ -38,12 +38,11 @@ public class DB {
             ps = conn.prepareStatement(query);
             ps.execute();
             
-            for (int i = 1; i <= BAM.tbls; i++){
-                query = "Insert into Tables (Section, Table) "
-                    + "Values ('1','" + i + "')";
+            query = "Insert into Tables (Section, Table) Values ";
+            for (int i = 1; i < BAM.tbls; i++) query += "('1','" + i + "'),";               
+            query += "('1','" + BAM.tbls + "')";      
             ps = conn.prepareStatement(query);
-            ps.execute();
-            }
+            ps.execute();  
             
             uploadRoundData(conn);      
             
@@ -173,11 +172,21 @@ public class DB {
             }
         }
     }
-    else {
+    else { 
+        /*  for 16, skip at 4th
+            for 18, skip at 5
+            for 20, skip at 5
+            for 22, skip at 6
+            for 24, skip at 6
+        */
+        
         row = 1;
         int max = rnds * tbls + 1;
+        int skipround = 4;
+        if (tbls == 18 || tbls == 20 ) skipround = 5;
+        else if (tbls == 22 || tbls == 24) skipround = 6;
         
-         for(rndno=1; rndno < 8; rndno++){
+        for(rndno=1; rndno < 8; rndno++){
             for(tblno=1; tblno <= tbls; tblno++){
                 
                 roundtable[row][0] = rndno;
@@ -188,7 +197,7 @@ public class DB {
                 roundtable[row][2] = tblno;
 
                 //EW number
-                if(rndno < 4){
+                if(rndno < skipround){
                     ew = tblno - (2*rndno);
                     while (ew < 1) ew = ew + tbls;
                 }
@@ -216,7 +225,7 @@ public class DB {
                 
                 row = row + 1;
             }
-         }            
+         }           
     }
     try{
         query = "Insert into RoundData (Section, Table, Round, NSPair, EWPair, LowBoard, HighBoard) Values ";
