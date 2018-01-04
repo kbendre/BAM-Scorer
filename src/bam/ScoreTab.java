@@ -32,7 +32,6 @@ import javafx.scene.text.Text;
 public class ScoreTab {
     public static int travellers[][] = new int[BAM.tbls*2][7]; 
     public static int recap[][] = new int[BAM.tbls + 2][BAM.tbls *2 + 4];// 0 - blank, 1-tbls = teams, checksum // 0 - team no., 1-bds = bd no, name, total, rank
-    //public static String raw[][] = new String[BAM.tbls * 14 * 2 + 100][8]; //ID, Board, NS, EW, Contract, By, Tricks, NS Score
     public static int id[]; 
     public static int level[];    
     public static int pairns[];    
@@ -51,6 +50,7 @@ public class ScoreTab {
     public static int noofScores = BAM.tbls * 28;
     public static Text namesText;
     
+     
     public static GridPane ScoreTab () {
         GridPane grid = new GridPane();
         grid.setAlignment(Pos.TOP_LEFT);
@@ -196,7 +196,8 @@ public class ScoreTab {
     public static void createRecap(){
         int size = nsscore.length;
         int diff = 0;
-        
+        for(int i = 0; i < BAM.tbls + 2; i++)  for(int j = 0; j< BAM.tbls * 2 + 4; j++)  recap[i][j] = -1;
+    
        // compar = new String[size];
         
         for(int i=0; i< size; i++){
@@ -252,7 +253,7 @@ public class ScoreTab {
         for(int i = 1; i <= BAM.tbls ; i++){
             total = 0;
             for(int j = 1; j <= BAM.tbls*2 ; j++){
-                total += recap[i][j];
+                if(recap[i][j] != -1) total += recap[i][j];
             }
             recap[i][0] = i;
             recap[i][totaly] = total;
@@ -283,21 +284,43 @@ public class ScoreTab {
         f=new File("d:\\test.htm");  
         String strLine, str = "Hi";
         
-        str = "<html><style> table, th, td { border-collapse: collapse; border: 1px solid black; } </style> <table>";
-        int max_y = BAM.tbls * 2 + 4;
-        int max_x = BAM.tbls; 
+        str = "<html>\n<style>\n table, th, td { \n" +
+                "border-collapse: collapse;\n" +
+                " border: 1px solid black; \n" +
+                " padding: 7px;\n" +
+                " }  </style> <table>";
+        
+        str += "<tr><th>No.</th><th>Name</th><th>Score</th><th>Rank</th>";
+        for(int i = 1; i <= BAM.tbls * 2 ; i++) str += "<th>" + i + "</th>";
+        str += "</tr>";
         //int max_x = nsscore.length;
+        int max_y = BAM.tbls * 2;
+        int max_x = BAM.tbls;
+        
         try{
-            f.createNewFile();  
-            for(int i = 1; i< max_x; i++){
-                str += row + BAM.teamnames[i];
-                for(int j = 1; j < max_y; j++){
-                    str += td + recap[i][j];
+            f.createNewFile();
+            boolean match = false;
+            int counter = 1;
+            int rank = 1;
+            while (counter <= max_x){//All these loops in order to sort ouput by rank
+                match = false;
+                for(int i = 1; i<= max_x; i++){
+                    if(recap[i][max_y+3] == rank){ 
+
+                    str += row + i + td + BAM.teamnames[i] + td + recap[i][max_y + 2] + td + recap[i][max_y + 3];
+                    for(int j = 1; j <= max_y; j++){
+                        if(recap[i][j] == -1) str += td + "";
+                        else str += td + recap[i][j];
+                    }
+                    //str += row + id[i] + td + pairns[i] + td + pairew[i] + td + nsscore[i] + td + nsmp[i] + td + compar[i];
+                    str += rowend;
+                    match = true;
+                    recap[i][max_y+3] = -1;
+                    counter++;
+                    }
                 }
-                //str += row + id[i] + td + pairns[i] + td + pairew[i] + td + nsscore[i] + td + nsmp[i] + td + compar[i];
-                str += rowend;
+                if (match == false) rank++;
             }
-            
             
             
             str += "</table></html>";
