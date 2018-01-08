@@ -45,14 +45,19 @@ public class BAM extends Application {
         namestab.setText("Names");
         namestab.setClosable(false);
        // namestab.setContent(NamesTab.NamesTab());
-       // tabPane.getTabs().add(namestab);
+        namestab.setDisable(true);
+        tabPane.getTabs().add(namestab);
+        
+        
         settab.setText("Start");
         settab.setClosable(false);
-        
+        settab.setDisable(true);
+        tabPane.getTabs().add(settab);
+       
         scoretab.setText("Score");
         scoretab.setClosable(false);
-        
-        
+        scoretab.setDisable(true);
+        tabPane.getTabs().add(scoretab);
         
         Scene scene = new Scene(tabPane, 800, 600);
         primaryStage.setScene(scene);

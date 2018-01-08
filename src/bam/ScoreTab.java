@@ -76,6 +76,14 @@ public class ScoreTab {
         namesText.setText(namesentered + "/" + BAM.tbls + " names entered.");
         grid.add(namesText, 0, 3);
         
+        Button scorebtn = new Button();
+        scorebtn.setText("Score");
+        scorebtn.setDisable(true);
+        HBox hbBtn = new HBox(10);
+        hbBtn.setAlignment(Pos.BOTTOM_RIGHT);
+        hbBtn.getChildren().add(scorebtn);
+        grid.add(hbBtn, 0,5 );
+        
         retbtn.setOnAction(new EventHandler<ActionEvent>(){
             @Override
             public void handle(ActionEvent event) {
@@ -83,7 +91,8 @@ public class ScoreTab {
                 try{
                 ret = retrieveScores();
                 ret = ret - removeDuplicates();                
-                retText.setText(ret + "/" + noofScores + " scores retrieved.");                
+                retText.setText(ret + "/" + noofScores + " scores retrieved.");   
+                if(ret == noofScores) scorebtn.setDisable(false);
                 }
                 catch (Exception e) {
                     e.printStackTrace();
@@ -91,13 +100,8 @@ public class ScoreTab {
             }
         });
           
-        Button btn = new Button();
-        btn.setText("Score");
-        HBox hbBtn = new HBox(10);
-        hbBtn.setAlignment(Pos.BOTTOM_RIGHT);
-        hbBtn.getChildren().add(btn);
-        grid.add(hbBtn, 0,5 );
-        btn.setOnAction(new EventHandler<ActionEvent>() {
+        
+        scorebtn.setOnAction(new EventHandler<ActionEvent>() {
 
             @Override
             public void handle(ActionEvent event) {
@@ -288,6 +292,7 @@ public class ScoreTab {
                 "border-collapse: collapse;\n" +
                 " border: 1px solid black; \n" +
                 " padding: 7px;\n" +
+                " font-size: 80%;\n" +
                 " }  </style> <table>";
         
         str += "<tr><th>No.</th><th>Name</th><th>Score</th><th>Rank</th>";

@@ -101,16 +101,17 @@ public class GetTab {
             public void handle(ActionEvent event) {
                 BAM.nameOfEvent = nameOfEventTextField.getText();
                 BAM.date = datePicker.getValue();
-                //tbls = Integer.parseInt(noofteamsTextField.getText());
                 BAM.tbls = noofteamsSpinner.getValue();
-                BAM.namestab.setContent(NamesTab.NamesTab());
-                BAM.tabPane.getTabs().add(BAM.namestab);
-                //System.out.println(BAM.tbls);
-                BAM.settab.setContent(SetTab.SetTab());
-                BAM.tabPane.getTabs().add(BAM.settab);
                 
+                BAM.namestab.setContent(NamesTab.NamesTab());
+                BAM.namestab.setDisable(false);
+                BAM.settab.setContent(SetTab.SetTab());
+                BAM.settab.setDisable(false);                
                 BAM.scoretab.setContent(ScoreTab.ScoreTab());
-                BAM.tabPane.getTabs().add(BAM.scoretab);
+                BAM.scoretab.setDisable(false); 
+                
+            
+            
             }
         });
         return grid;
