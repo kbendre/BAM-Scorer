@@ -6,7 +6,7 @@ import java.sql.*;
 
 /**
  *
- * @author lenovo
+ * @author Kaustubh Bendre
  */
 public class DB {
     
@@ -18,7 +18,7 @@ public class DB {
     public static void initiateDB() throws ClassNotFoundException, SQLException{
         
         try{
-            Connection conn =DriverManager.getConnection("jdbc:ucanaccess://C:\\Users\\lenovo\\Documents\\dchbam.bws;memory=true");           
+            Connection conn =DriverManager.getConnection("jdbc:ucanaccess://" + BAM.dbpath + ";memory=true");           
             PreparedStatement ps = null;
             String query;
             

@@ -58,7 +58,7 @@ public class SetTab {
                 try{
                 DB.initiateDB();
                    
-                Process process = new ProcessBuilder("C:\\Program Files (x86)\\Bridgemate Pro\\BMPro.exe" ,"/f:[C:\\Users\\lenovo\\Documents\\dchbam.bws]").start();
+                Process process = new ProcessBuilder(BAM.bmpropath + "\\BMPro.exe","/f:[" + BAM.dbpath + "]").start();
               //  ScoreTab.ScoreTab();
                 
                 }

@@ -122,7 +122,7 @@ public class ScoreTab {
     public static int retrieveScores() throws ClassNotFoundException, SQLException{
         int size = 0;
         try{
-            Connection conn =DriverManager.getConnection("jdbc:ucanaccess://C:\\Users\\lenovo\\Documents\\dchbam.bws;memory=true");
+            Connection conn =DriverManager.getConnection("jdbc:ucanaccess://C:\\KBaM\\dchbam.bws;memory=true");
             ResultSet rs;
             PreparedStatement ps = null;
             Statement st =conn.createStatement();
@@ -285,13 +285,14 @@ public class ScoreTab {
         String row = "<tr><td>";
         String rowend = "</td></tr>";
         File f;
-        f=new File("d:\\test.htm");  
-        String strLine, str = "Hi";
+        f=new File("c:\\KBaM\\BAM_results_" + BAM.date + ".htm");  
+        String strLine, str = "";
         
         str = "<html>\n<style>\n table, th, td { \n" +
                 "border-collapse: collapse;\n" +
                 " border: 1px solid black; \n" +
-                " padding: 7px;\n" +
+                " padding: 8px;\n" +
+                "font-family: arial, sans-serif;\n" +
                 " font-size: 80%;\n" +
                 " }  </style> <table>";
         

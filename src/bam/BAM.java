@@ -29,7 +29,8 @@ public class BAM extends Application {
     public static Tab namestab = new Tab();
     public static Tab settab = new Tab();
     public static Tab scoretab = new Tab();
-    
+    public static String dbpath = "C:\\users\\lenovo\\documents\\dchbam.bws";
+    public static String bmpropath = "";
     
     @Override
     public void start(Stage primaryStage) {

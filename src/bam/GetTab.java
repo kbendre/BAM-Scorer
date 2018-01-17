@@ -43,7 +43,7 @@ public class GetTab {
         Label nameOfEventlabel = new Label("Name of Event:");
         grid.add(nameOfEventlabel, 0, 1);
 
-        TextField nameOfEventTextField = new TextField("Deccan Club Hirabaug BAM");
+        TextField nameOfEventTextField = new TextField("Deccan Club BAM");
         nameOfEventTextField.setPrefWidth(250);
         grid.add(nameOfEventTextField, 1, 1);
         
@@ -102,6 +102,7 @@ public class GetTab {
                 BAM.nameOfEvent = nameOfEventTextField.getText();
                 BAM.date = datePicker.getValue();
                 BAM.tbls = noofteamsSpinner.getValue();
+                BAM.bmpropath = pathTextField.getText();
                 
                 BAM.namestab.setContent(NamesTab.NamesTab());
                 BAM.namestab.setDisable(false);
