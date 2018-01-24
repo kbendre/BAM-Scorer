@@ -31,7 +31,7 @@ import javafx.scene.text.Text;
  */
 public class ScoreTab {
     public static int travellers[][] = new int[BAM.tbls*2][7]; 
-    public static int recap[][] = new int[BAM.tbls + 2][BAM.tbls *2 + 4];// 0 - blank, 1-tbls = teams, checksum // 0 - team no., 1-bds = bd no, name, total, rank
+    public static int recap[][] = new int[BAM.tbls + 2][BAM.tbls *2 + 4];
     public static int id[]; 
     public static int level[];    
     public static int pairns[];    
@@ -122,7 +122,7 @@ public class ScoreTab {
     public static int retrieveScores() throws ClassNotFoundException, SQLException{
         int size = 0;
         try{
-            Connection conn =DriverManager.getConnection("jdbc:ucanaccess://C:\\KBaM\\dchbam.bws;memory=true");
+            Connection conn =DriverManager.getConnection("jdbc:ucanaccess://" + BAM.dbpath + ";memory=true");
             ResultSet rs;
             PreparedStatement ps = null;
             Statement st =conn.createStatement();
@@ -361,7 +361,7 @@ public class ScoreTab {
                         pairew[i] = -1;
                         board[i] = -1;
                         dups += 1;
-                        j = size; //exit inside for loop
+                        j = size; //exit inside 'for' loop
                     }
                 }
             }

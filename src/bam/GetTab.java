@@ -7,6 +7,8 @@ package bam;
 
 import java.io.File;
 import java.time.LocalDate;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -15,6 +17,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -25,7 +28,7 @@ import javafx.stage.DirectoryChooser;
 
 /**
  *
- * @author lenovo
+ * @author Kaustubh Bendre
  */
 public class GetTab {
     public static GridPane GetTab () {
@@ -56,19 +59,71 @@ public class GetTab {
         Label noOfTeamslabel = new Label("Number of Teams:");
         grid.add(noOfTeamslabel, 0, 3);
 
-        Spinner<Integer> noofteamsSpinner = new Spinner(15,25,20);
+        Spinner<Integer> noofteamsSpinner = new Spinner(11,26,12);
         grid.add(noofteamsSpinner, 1, 3);
         
-
+     //   Label noOfRoundslabel = new Label("Rounds Played:");
+     //   grid.add(noOfRoundslabel, 0, 4);
+        
+     //   Spinner<Integer> noofroundsSpinner = new Spinner(11,14,11);
+     //   noofroundsSpinner.setDisable(true);
+     //   grid.add(noofroundsSpinner, 1, 4);
+        
+      /*  noofteamsSpinner.valueProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observable,
+                    Number oldValue, Number newValue) {
+                    int tbls = newValue.intValue();
+                    SpinnerValueFactory.IntegerSpinnerValueFactory intFactory =
+        (SpinnerValueFactory.IntegerSpinnerValueFactory)  noofroundsSpinner.getValueFactory();
+                    switch(tbls){
+                        case 11:
+                            intFactory.setMax(10);
+                            intFactory.setMin(10);
+                            noofroundsSpinner.setDisable(true);
+                            break;
+                        case 12:
+                            intFactory.setMax(11);
+                            intFactory.setMin(11);
+                            noofroundsSpinner.setDisable(true);
+                            break;
+                        case 13:
+                            intFactory.setMax(12);
+                            intFactory.setMin(12);
+                            noofroundsSpinner.setDisable(true);
+                            break;
+                        case 14:
+                            intFactory.setMax(12);
+                            intFactory.setMin(12);
+                            noofroundsSpinner.setDisable(true);
+                            break;
+                        case 15:
+                            intFactory.setMax(14);
+                            intFactory.setMin(12);
+                            intFactory.setAmountToStepBy(2);
+                            noofroundsSpinner.setDisable(false);
+                            break;
+                        default:
+                            intFactory.setMax(14);
+                            intFactory.setMin(12);
+                            intFactory.setAmountToStepBy(2);
+                            noofroundsSpinner.setDisable(false);
+                            break;
+                    }
+                
+            }
+        });*/
+       // noofteamsSpinner.valueProperty().addListener(obs, 
+        
         Label pathOfdblabel = new Label("Path of BMPro.exe :");
-        grid.add(pathOfdblabel, 0, 4);
+        grid.add(pathOfdblabel, 0, 5);
 
         Text pathTextField = new Text("C:\\Program Files (x86)\\Bridgemate Pro");
         //pathTextField.setPrefWidth(300);
-        grid.add(pathTextField, 1, 4);
+        grid.add(pathTextField, 1, 5);
         Button pathbtn = new Button();
         pathbtn.setText("Change");
-        grid.add(pathbtn, 2, 4);
+        grid.add(pathbtn, 2, 5);
         pathbtn.setOnAction(new EventHandler<ActionEvent>(){
             @Override
             public void handle(ActionEvent event) {
@@ -103,6 +158,7 @@ public class GetTab {
                 BAM.date = datePicker.getValue();
                 BAM.tbls = noofteamsSpinner.getValue();
                 BAM.bmpropath = pathTextField.getText();
+                BAM.teamnames = new String[BAM.tbls+1];
                 
                 BAM.namestab.setContent(NamesTab.NamesTab());
                 BAM.namestab.setDisable(false);

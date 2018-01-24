@@ -12,11 +12,9 @@ import javafx.stage.Stage;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 
-import bam.GetTab;
-import javafx.scene.layout.GridPane;
 /**
  *
- * @author lenovo
+ * @author Kaustubh Bendre
  */
 public class BAM extends Application {
     public static String nameOfEvent;
@@ -24,12 +22,13 @@ public class BAM extends Application {
     public boolean byetable = false;
     public static LocalDate date;
     public int rnds = 14; 
-    public static String[] teamnames = new String[30];
+    public static String[] teamnames;// = new String[30];
     public static TabPane tabPane = new TabPane();
     public static Tab namestab = new Tab();
     public static Tab settab = new Tab();
     public static Tab scoretab = new Tab();
     public static String dbpath = "C:\\users\\lenovo\\documents\\dchbam.bws";
+   // public static String dbpath = "C:\\KBaM\\dchbam.bws";
     public static String bmpropath = "";
     
     @Override

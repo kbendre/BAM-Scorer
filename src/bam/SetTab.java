@@ -19,7 +19,7 @@ import javafx.scene.text.Text;
 
 /**
  *
- * @author lenovo
+ * @author Kaustubh Bendre
  */
 public class SetTab {
     public static GridPane SetTab () {

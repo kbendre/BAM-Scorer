@@ -13,8 +13,6 @@ public class DB {
     //I've decided to not create a db after all. Too boring.
     //We'll take an existing db, empty the tables and reuse it.
     
-    //String dbPath = "C:/Users/Public/newDb.bws";
-    
     public static void initiateDB() throws ClassNotFoundException, SQLException{
         
         try{
@@ -51,8 +49,7 @@ public class DB {
 			e.printStackTrace();
 	}
 
-    }
-    
+    }    
     
     public static void ClearDB(Connection conn) throws SQLException {
         ResultSet rs;
@@ -125,19 +122,196 @@ public class DB {
         
     }
     
-    public static void uploadRoundData(Connection conn) throws SQLException{
-        int rnds = 14;
+    public static void uploadRoundData(Connection conn) throws SQLException{        
         int tbls = BAM.tbls;
-        int bds;
+        int rnds = 12;
+        if(tbls == 11) rnds = 10;
         int[][] roundtable;
-        int rndno,tblno,ns,ew,lo,hi,trndno;
+        int rndno,tblno,ns,ew,hi,trndno;
         int row;
+        int comparisons = tbls*rnds;
         String query;
         PreparedStatement ps;
-        bds = tbls * 2;
-    roundtable = new int[tbls*rnds+1][6];// rows start from 1, cols start from 0    
+             
+       
+        if(tbls == 11){
+            roundtable = new int[comparisons+1][6];// rows start from 1, cols start from 0    
+            row = 1;
+            for(rndno=1; rndno < 11; rndno++){
+                for(tblno=1; tblno <= tbls; tblno++){
+                    //EW number
+                    ew = tblno - (2*rndno);
+                    while (ew < 1) ew = ew + tbls;
+                    
+                    roundtable[row][0] = rndno;
+                    roundtable[row][1] = tblno;
+
+                    //NS number (same as table number)
+                    roundtable[row][2] = tblno;                   
+
+                    roundtable[row][3] = ew;
+
+                    //Low Board, High Board
+                    hi = (tblno - rndno) * 2;
+                    while (hi <= 0) hi = hi + (tbls * 2);
+                    while (hi > tbls*2) hi = hi - (tbls * 2);
+
+                    roundtable[row][4] = hi - 1;
+                    roundtable[row][5] = hi;
+                    
+                    row = row + 1;
+                    
+                    }
+                }
+        }
+        else if(tbls < 19){
+            boolean bye = false;
+            if(tbls % 2 == 0){
+                comparisons -= rnds;                
+                bye = true;
+                tbls = tbls + 1;
+            }
+            roundtable = new int[comparisons+1][6];// rows start from 1, cols start from 0  
+        
+                
+                row = 1;
+        
+        for(rndno=1; rndno < 13; rndno++){
+            for(tblno=1; tblno <= tbls; tblno++){
+                    // "rndno" is the actual Round number in the tournament
+                    // "trndno" is Theoretical round number ( used after Round 6 - The Big Move)
+                    // "Theoretical round number" is what the round number would be if there were no skip after round 6.
+                    if(rndno < 7) trndno = rndno;
+                    else trndno = rndno + (tbls - 13);
+                    
+                    //NS, EW number
+                    ns = tblno;
+                    ew = tblno - (2*trndno);
+                    while (ew < 1) ew = ew + tbls;
+                    
+                    if(!(bye && (ew == tbls || ns == tbls))){
+                    roundtable[row][0] = rndno;
+                    roundtable[row][1] = tblno;
+
+                    //NS number (same as table number)
+                    roundtable[row][2] = tblno;                   
+
+                    roundtable[row][3] = ew;
+
+                    //Low Board, High Board
+                    hi = (tblno - trndno) * 2;
+                    while (hi <= 0) hi = hi + (tbls * 2);
+                    while (hi > tbls*2) hi = hi - (tbls * 2);
+
+                    roundtable[row][4] = hi - 1;
+                    roundtable[row][5] = hi;
+                    
+                    row = row + 1;
+                    }
+                }
+            }
+        }
+        else{
+            //No. of teams = 19 to 25. One board per round.
+            rnds = tbls - 1;
+            comparisons = rnds * tbls;
+            int maxrndno = tbls;
+            boolean bye = false;
+            if(tbls % 2 == 0){
+                comparisons -= rnds;                
+                bye = true;
+                tbls = tbls + 1;
+            }
+            roundtable = new int[comparisons+1][6];// rows start from 1, cols start from 0  
+        
+                
+                row = 1;
+        
+        for(rndno=1; rndno < maxrndno; rndno++){
+            for(tblno=1; tblno <= tbls; tblno++){
+                                  
+                    //NS, EW number
+                    ns = tblno;
+                    ew = tblno - (2*rndno);
+                    while (ew < 1) ew = ew + tbls;
+                    
+                    if(!(bye && (ew == tbls || ns == tbls))){
+                    roundtable[row][0] = rndno;
+                    roundtable[row][1] = tblno;
+
+                    //NS number (same as table number)
+                    roundtable[row][2] = tblno;                   
+
+                    roundtable[row][3] = ew;
+
+                    //Low Board, High Board
+                    hi = (tblno - rndno) * 2;
+                    while (hi <= 0) hi = hi + (tbls * 2);
+                    while (hi > tbls*2) hi = hi - (tbls * 2);
+                   
+                    
+                    hi /= 2; //Since there's only one board per round.
+                    
+                    roundtable[row][4] = hi;
+                    roundtable[row][5] = hi;
+                    
+                    row = row + 1;
+                    }
+                }
+            }
+        }
+    tbls = BAM.tbls;
+    try{
+        int half = comparisons/2; //StackOverFlow Exception if the string is too long, hence splitting it up.
+        query = "Insert into RoundData (Section, Table, Round, NSPair, EWPair, LowBoard, HighBoard) Values ";
+        for(int i=1; i<half; i++){
+            query += "('1','" 
+                    + roundtable[i][1] + "','" + roundtable[i][0] + "','" + roundtable[i][2] + "','" 
+                    + roundtable[i][3] + "','" + roundtable[i][4] + "','" + roundtable[i][5] + "'), "; //note the comma at the end
+        }  
+        int i = half; //last iteration done outside loop to remove the comma at the end.
+        query += "('1','" 
+                    + roundtable[i][1] + "','" + roundtable[i][0] + "','" + roundtable[i][2] + "','" 
+                    + roundtable[i][3] + "','" + roundtable[i][4] + "','" + roundtable[i][5] + "')"; //no comma at the end
+        
+        ps = conn.prepareStatement(query);
+            ps.execute();
+        query = "Insert into RoundData (Section, Table, Round, NSPair, EWPair, LowBoard, HighBoard) Values ";
+        for(i=half+1; i<comparisons; i++){
+            query += "('1','" 
+                    + roundtable[i][1] + "','" + roundtable[i][0] + "','" + roundtable[i][2] + "','" 
+                    + roundtable[i][3] + "','" + roundtable[i][4] + "','" + roundtable[i][5] + "'), "; //note the comma at the end
+        }  
+        i = comparisons; //last iteration done outside loop to remove the comma at the end.
+        query += "('1','" 
+                    + roundtable[i][1] + "','" + roundtable[i][0] + "','" + roundtable[i][2] + "','" 
+                    + roundtable[i][3] + "','" + roundtable[i][4] + "','" + roundtable[i][5] + "')"; //no comma at the end
+        
+            ps = conn.prepareStatement(query);
+            ps.execute();
+                   
+    }
+    catch (Exception e) {
+			e.printStackTrace();
+	}
+    }
     
-    if (tbls%2 == 1){
+    public static void uploadSettings(Connection conn) throws SQLException {
+        
+        
+        try{
+            
+        }
+        catch (Exception e) {
+			e.printStackTrace();
+	}
+        
+    }
+}
+
+
+/*Round Table Data for 14 rounds --
+/*   if (tbls%2 == 1){
         row = 1;
         for(rndno=1; rndno < 15; rndno++){
             for(tblno=1; tblno <= tbls; tblno++){
@@ -178,7 +352,7 @@ public class DB {
             for 20, skip at 5
             for 22, skip at 6
             for 24, skip at 6
-        */
+        
         
         row = 1;
         int max = rnds * tbls + 1;
@@ -226,39 +400,6 @@ public class DB {
                 row = row + 1;
             }
          }           
-    }
-    try{
-        query = "Insert into RoundData (Section, Table, Round, NSPair, EWPair, LowBoard, HighBoard) Values ";
-        for(int i=1; i<tbls*rnds; i++){
-            query += "('1','" 
-                    + roundtable[i][1] + "','" + roundtable[i][0] + "','" + roundtable[i][2] + "','" 
-                    + roundtable[i][3] + "','" + roundtable[i][4] + "','" + roundtable[i][5] + "'), "; //note the comma at the end
-        }  
-        int i = tbls*rnds; //last iteration done outside loop to remove the comma at the end.
-        query += "('1','" 
-                    + roundtable[i][1] + "','" + roundtable[i][0] + "','" + roundtable[i][2] + "','" 
-                    + roundtable[i][3] + "','" + roundtable[i][4] + "','" + roundtable[i][5] + "')"; //no comma at the end
-        
-            ps = conn.prepareStatement(query);
-            ps.execute();
-                   
-    }
-    catch (Exception e) {
-			e.printStackTrace();
-	}
-    }
-    
-    public static void uploadSettings(Connection conn) throws SQLException {
-        
-        
-        try{
-            
-        }
-        catch (Exception e) {
-			e.printStackTrace();
-	}
-        
-    }
-}
+    }*/
     
 
