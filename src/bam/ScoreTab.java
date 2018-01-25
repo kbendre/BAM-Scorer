@@ -31,7 +31,9 @@ import javafx.scene.text.Text;
  */
 public class ScoreTab {
     public static int travellers[][] = new int[BAM.tbls*2][7]; 
-    public static int recap[][] = new int[BAM.tbls + 2][BAM.tbls *2 + 4];
+    public static int xmax = BAM.bds + 4;
+    public static int ymax = BAM.tbls + 2;
+    public static int recap[][] = new int[ymax][xmax];
     public static int id[]; 
     public static int level[];    
     public static int pairns[];    
@@ -78,7 +80,7 @@ public class ScoreTab {
         
         Button scorebtn = new Button();
         scorebtn.setText("Score");
-        scorebtn.setDisable(true);
+        //scorebtn.setDisable(true);
         HBox hbBtn = new HBox(10);
         hbBtn.setAlignment(Pos.BOTTOM_RIGHT);
         hbBtn.getChildren().add(scorebtn);
@@ -92,7 +94,7 @@ public class ScoreTab {
                 ret = retrieveScores();
                 ret = ret - removeDuplicates();                
                 retText.setText(ret + "/" + noofScores + " scores retrieved.");   
-                if(ret == noofScores) scorebtn.setDisable(false);
+                //if(ret == noofScores) scorebtn.setDisable(false);
                 }
                 catch (Exception e) {
                     e.printStackTrace();
@@ -106,7 +108,7 @@ public class ScoreTab {
             @Override
             public void handle(ActionEvent event) {
                 try{           
-                    createRecap();           
+            //        createRecap();           
                     createReports();           
                 }
                 catch (Exception e) {
@@ -135,6 +137,9 @@ public class ScoreTab {
             while(rs.next()) {
             size = Integer.parseInt(rs.getString(1));
             }
+            query = "Select ID, Board, PairNS, PairEW, Contract, [NS/EW], Result from ReceivedData";
+            ps = conn.prepareStatement(query);
+            rs = ps.executeQuery();
             
             id = new int[size];
             pairns = new int[size];
@@ -149,11 +154,7 @@ public class ScoreTab {
             dblstr = new String[size];
             made = new String[size];
             strain = new String[size];
-                        
-            
-            query = "Select ID, Board, PairNS, PairEW, Contract, [NS/EW], Result from ReceivedData";
-            ps = conn.prepareStatement(query);
-            rs = ps.executeQuery();
+                           
             
             int i = 0;
             while (rs.next()){
@@ -200,7 +201,7 @@ public class ScoreTab {
     public static void createRecap(){
         int size = nsscore.length;
         int diff = 0;
-        for(int i = 0; i < BAM.tbls + 2; i++)  for(int j = 0; j< BAM.tbls * 2 + 4; j++)  recap[i][j] = -1;
+        for(int i = 0; i < ymax; i++)  for(int j = 0; j< xmax; j++)  recap[i][j] = -1;
     
        // compar = new String[size];
         
@@ -250,13 +251,13 @@ public class ScoreTab {
         }
         
         int total;
-        int totaly = BAM.tbls * 2 + 2;
+        int totaly = BAM.bds + 2;
         int rank;
         int ranky = totaly + 1;
         int namey = totaly - 1;
         for(int i = 1; i <= BAM.tbls ; i++){
             total = 0;
-            for(int j = 1; j <= BAM.tbls*2 ; j++){
+            for(int j = 1; j <= xmax - 4 ; j++){
                 if(recap[i][j] != -1) total += recap[i][j];
             }
             recap[i][0] = i;
@@ -287,7 +288,9 @@ public class ScoreTab {
         File f;
         f=new File("c:\\KBaM\\BAM_results_" + BAM.date + ".htm");  
         String strLine, str = "";
-        
+        File f1;
+        f1=new File("c:\\KBaM\\BAM_results_" + BAM.date + ".csv");  
+        String str1 = "";
         str = "<html>\n<style>\n table, th, td { \n" +
                 "border-collapse: collapse;\n" +
                 " border: 1px solid black; \n" +
@@ -297,14 +300,20 @@ public class ScoreTab {
                 " }  </style> <table>";
         
         str += "<tr><th>No.</th><th>Name</th><th>Score</th><th>Rank</th>";
-        for(int i = 1; i <= BAM.tbls * 2 ; i++) str += "<th>" + i + "</th>";
+        str1 = "No.,Name,Score,Rank";
+        for(int i = 1; i <= BAM.bds ; i++){
+            str += "<th>" + i + "</th>";
+            str1 += "," + i;
+        }
         str += "</tr>";
+        str1 += "\n";
         //int max_x = nsscore.length;
-        int max_y = BAM.tbls * 2;
+        int max_y = BAM.bds;
         int max_x = BAM.tbls;
         
         try{
             f.createNewFile();
+            f1.createNewFile();
             boolean match = false;
             int counter = 1;
             int rank = 1;
@@ -314,12 +323,20 @@ public class ScoreTab {
                     if(recap[i][max_y+3] == rank){ 
 
                     str += row + i + td + BAM.teamnames[i] + td + recap[i][max_y + 2] + td + recap[i][max_y + 3];
+                    str1 += i + "," + BAM.teamnames[i] + "," + recap[i][max_y + 2] + "," + recap[i][max_y + 3];
                     for(int j = 1; j <= max_y; j++){
-                        if(recap[i][j] == -1) str += td + "";
-                        else str += td + recap[i][j];
+                        if(recap[i][j] == -1) {
+                            str += td + "";
+                            str1 += ",";
+                        }
+                        else {
+                            str += td + recap[i][j];
+                            str1 += "," + recap[i][j];
+                        }
                     }
                     //str += row + id[i] + td + pairns[i] + td + pairew[i] + td + nsscore[i] + td + nsmp[i] + td + compar[i];
                     str += rowend;
+                    str1 += "\n";
                     match = true;
                     recap[i][max_y+3] = -1;
                     counter++;
@@ -332,8 +349,11 @@ public class ScoreTab {
             str += "</table></html>";
             FileWriter fr = new FileWriter(f);
             fr.write(str);
+             FileWriter fr1 = new FileWriter(f1);
+            fr1.write(str1);
             
             fr.close();
+            fr1.close();
         }
         
         catch (Exception e){

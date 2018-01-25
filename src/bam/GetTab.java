@@ -7,8 +7,6 @@ package bam;
 
 import java.io.File;
 import java.time.LocalDate;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -17,7 +15,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.Spinner;
-import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -157,6 +154,7 @@ public class GetTab {
                 BAM.nameOfEvent = nameOfEventTextField.getText();
                 BAM.date = datePicker.getValue();
                 BAM.tbls = noofteamsSpinner.getValue();
+                BAM.bds = (BAM.tbls > 18) ? BAM.tbls : BAM.tbls * 2;
                 BAM.bmpropath = pathTextField.getText();
                 BAM.teamnames = new String[BAM.tbls+1];
                 
@@ -165,10 +163,7 @@ public class GetTab {
                 BAM.settab.setContent(SetTab.SetTab());
                 BAM.settab.setDisable(false);                
                 BAM.scoretab.setContent(ScoreTab.ScoreTab());
-                BAM.scoretab.setDisable(false); 
-                
-            
-            
+                BAM.scoretab.setDisable(false);        
             }
         });
         return grid;

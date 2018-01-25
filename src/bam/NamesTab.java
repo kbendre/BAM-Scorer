@@ -25,14 +25,13 @@ public class NamesTab {
         grid.setHgap(10);
         grid.setVgap(10);
         grid.setPadding(new Insets(25, 25, 25, 25));
-
         
         Text scenetitle = new Text("Team Names:");
         scenetitle.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
         grid.add(scenetitle, 0, 0, 2, 1);
         
         int i, j, k;
-        String str1, str2;
+        String str1;
         
         k = BAM.tbls;
         j = (k%2 == 0) ? k/2 : k/2 + 1;
@@ -40,8 +39,7 @@ public class NamesTab {
         
         for (i=1; i <= j; i++){
             str1 = "Team " + i;
-            //str2 = "namestabLabel" + i;
-            
+                        
             Label label = new Label(str1);
             grid.add(label, 0, i);
 
@@ -72,7 +70,6 @@ public class NamesTab {
 
             @Override
             public void handle(ActionEvent event) {
-                //ObservableList<Node> list  = grid.getChildren();
                 for (int i = 1; i < BAM.tbls; i++){
                     BAM.teamnames[i] = fields[i].getText();
                 }

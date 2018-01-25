@@ -5,7 +5,6 @@
  */
 package bam;
 
-import java.io.IOException;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -56,11 +55,8 @@ public class SetTab {
             @Override
             public void handle(ActionEvent event)  {
                 try{
-                DB.initiateDB();
-                   
-                Process process = new ProcessBuilder(BAM.bmpropath + "\\BMPro.exe","/f:[" + BAM.dbpath + "]").start();
-              //  ScoreTab.ScoreTab();
-                
+                DB.initiateDB();                   
+                Process process = new ProcessBuilder(BAM.bmpropath + "\\BMPro.exe","/f:[" + BAM.dbpath + "]").start();             
                 }
                 catch (Exception e) {
 			e.printStackTrace();
