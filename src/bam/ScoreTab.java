@@ -30,7 +30,7 @@ import javafx.scene.text.Text;
  * @author Kaustubh Bendre
  */
 public class ScoreTab {
-    public static int travellers[][] = new int[BAM.tbls*2][7]; 
+    //public static int travellers[][] = new int[BAM.tbls*2][7]; 
     public static int xmax = BAM.bds + 4;
     public static int ymax = BAM.tbls + 2;
     public static int recap[][] = new int[ymax][xmax];
@@ -49,7 +49,7 @@ public class ScoreTab {
     public static int nsmp[];
     //public static String compar[]; //for debugging
     
-    public static int noofScores = BAM.tbls * 28;
+    //public static int noofScores = BAM.tbls * 28;
     public static Text namesText;
     
      
@@ -69,7 +69,7 @@ public class ScoreTab {
         grid.add(retbtn, 0, 1);
         
         Text retText = new Text();
-        retText.setText("0/" + noofScores + " scores retrieved.");
+        retText.setText("0 scores retrieved.");
         grid.add(retText, 0, 2);
         
         namesText = new Text();
@@ -80,7 +80,7 @@ public class ScoreTab {
         
         Button scorebtn = new Button();
         scorebtn.setText("Score");
-        //scorebtn.setDisable(true);
+        scorebtn.setDisable(true);
         HBox hbBtn = new HBox(10);
         hbBtn.setAlignment(Pos.BOTTOM_RIGHT);
         hbBtn.getChildren().add(scorebtn);
@@ -93,8 +93,8 @@ public class ScoreTab {
                 try{
                 ret = retrieveScores();
                 ret = ret - removeDuplicates();                
-                retText.setText(ret + "/" + noofScores + " scores retrieved.");   
-                //if(ret == noofScores) scorebtn.setDisable(false);
+                retText.setText(ret + " scores retrieved.");   
+                if(ret > 0) scorebtn.setDisable(false);
                 }
                 catch (Exception e) {
                     e.printStackTrace();
@@ -108,7 +108,7 @@ public class ScoreTab {
             @Override
             public void handle(ActionEvent event) {
                 try{           
-            //        createRecap();           
+                    createRecap();           
                     createReports();           
                 }
                 catch (Exception e) {
@@ -297,9 +297,12 @@ public class ScoreTab {
                 " padding: 8px;\n" +
                 "font-family: arial, sans-serif;\n" +
                 " font-size: 80%;\n" +
-                " }  </style> <table>";
+                " }  </style> ";
         
-        str += "<tr><th>No.</th><th>Name</th><th>Score</th><th>Rank</th>";
+        str += "<h3>" + BAM.nameOfEvent + "</h3> \n\n";
+        str += "<h4>" + BAM.date + "</h4>\n\n";
+        
+        str += "<table><tr><th>No.</th><th>Name</th><th>Score</th><th>Rank</th>";
         str1 = "No.,Name,Score,Rank";
         for(int i = 1; i <= BAM.bds ; i++){
             str += "<th>" + i + "</th>";

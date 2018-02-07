@@ -5,7 +5,6 @@
  */
 package bam;
 
-import java.io.File;
 import java.time.LocalDate;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -21,7 +20,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
-import javafx.stage.DirectoryChooser;
 
 /**
  *
@@ -59,7 +57,74 @@ public class GetTab {
         Spinner<Integer> noofteamsSpinner = new Spinner(11,26,12);
         grid.add(noofteamsSpinner, 1, 3);
         
-     //   Label noOfRoundslabel = new Label("Rounds Played:");
+        Button btn = new Button();
+        btn.setText("Set Parameters");
+        HBox hbBtn = new HBox(10);
+        hbBtn.setAlignment(Pos.BOTTOM_RIGHT);
+        hbBtn.getChildren().add(btn);
+        grid.add(hbBtn, 2, 3);
+        
+        Text scenetitle2 = new Text("Initialise Bridgemate Control: ");
+        scenetitle2.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
+        grid.add(scenetitle2, 0, 5);
+                             
+         Button btn2 = new Button();
+        btn2.setText("Start BCS");
+        HBox hbBtn2 = new HBox(10);
+        hbBtn2.setAlignment(Pos.BOTTOM_RIGHT);
+        hbBtn2.getChildren().add(btn2);
+        grid.add(hbBtn2, 0, 6 );
+        btn2.setDisable(true);
+        btn2.setOnAction(new EventHandler<ActionEvent>() {
+
+            @Override
+            public void handle(ActionEvent event)  {
+                try{
+                DB.initiateDB();                   
+                Process process = new ProcessBuilder(BAM.bmpropath + "\\BMPro.exe","/f:[" + BAM.dbpath + "]/s").start();             
+                }
+                catch (Exception e) {
+			e.printStackTrace();
+                }
+                
+            }
+        });
+        
+        
+        btn.setOnAction(new EventHandler<ActionEvent>() {
+
+            @Override
+            public void handle(ActionEvent event) {
+                BAM.nameOfEvent = nameOfEventTextField.getText();
+                BAM.date = datePicker.getValue();
+                BAM.tbls = noofteamsSpinner.getValue();
+                BAM.bds = (BAM.tbls > 18) ? BAM.tbls : BAM.tbls * 2;
+                //BAM.bmpropath = pathTextField.getText();
+                BAM.teamnames = new String[BAM.tbls+1];
+                
+                
+               
+                btn2.setDisable(false);
+                BAM.namestab.setContent(NamesTab.NamesTab());
+                BAM.namestab.setDisable(false);
+               // BAM.settab.setContent(SetTab.SetTab());
+              //  BAM.settab.setDisable(false);                
+                BAM.scoretab.setContent(ScoreTab.ScoreTab());
+                BAM.scoretab.setDisable(false);        
+            }
+        });
+        return grid;
+        
+            //StackPane root = new StackPane();
+            //root.getChildren().add(btn);
+
+            //Scene scene = new Scene(root, 300, 250);
+}
+}
+
+
+
+           //   Label noOfRoundslabel = new Label("Rounds Played:");
      //   grid.add(noOfRoundslabel, 0, 4);
         
      //   Spinner<Integer> noofroundsSpinner = new Spinner(11,14,11);
@@ -112,7 +177,7 @@ public class GetTab {
         });*/
        // noofteamsSpinner.valueProperty().addListener(obs, 
         
-        Label pathOfdblabel = new Label("Path of BMPro.exe :");
+       /* Label pathOfdblabel = new Label("Path of BMPro.exe :");
         grid.add(pathOfdblabel, 0, 5);
 
         Text pathTextField = new Text("C:\\Program Files (x86)\\Bridgemate Pro");
@@ -138,39 +203,5 @@ public class GetTab {
                 }
             }
         });
-        //
+        //*/
         
-
-        Button btn = new Button();
-        btn.setText("Set Parameters");
-        HBox hbBtn = new HBox(10);
-        hbBtn.setAlignment(Pos.BOTTOM_RIGHT);
-        hbBtn.getChildren().add(btn);
-        grid.add(hbBtn, 2, 7);
-        btn.setOnAction(new EventHandler<ActionEvent>() {
-
-            @Override
-            public void handle(ActionEvent event) {
-                BAM.nameOfEvent = nameOfEventTextField.getText();
-                BAM.date = datePicker.getValue();
-                BAM.tbls = noofteamsSpinner.getValue();
-                BAM.bds = (BAM.tbls > 18) ? BAM.tbls : BAM.tbls * 2;
-                BAM.bmpropath = pathTextField.getText();
-                BAM.teamnames = new String[BAM.tbls+1];
-                
-                BAM.namestab.setContent(NamesTab.NamesTab());
-                BAM.namestab.setDisable(false);
-                BAM.settab.setContent(SetTab.SetTab());
-                BAM.settab.setDisable(false);                
-                BAM.scoretab.setContent(ScoreTab.ScoreTab());
-                BAM.scoretab.setDisable(false);        
-            }
-        });
-        return grid;
-        
-            //StackPane root = new StackPane();
-            //root.getChildren().add(btn);
-
-            //Scene scene = new Scene(root, 300, 250);
-}
-}

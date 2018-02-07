@@ -25,18 +25,18 @@ public class BAM extends Application {
     public static String[] teamnames;// = new String[30];
     public static TabPane tabPane = new TabPane();
     public static Tab namestab = new Tab();
-    public static Tab settab = new Tab();
+   // public static Tab settab = new Tab();
     public static Tab scoretab = new Tab();
    // public static String dbpath = "C:\\users\\lenovo\\documents\\dchbam.bws";
     public static String dbpath = "C:\\KBaM\\dchbam.bws";
-    public static String bmpropath = "";
+    public static String bmpropath = "C:\\Program Files (x86)\\Bridgemate Pro";
     public static int bds;
     @Override
     public void start(Stage primaryStage) {
  //       TabPane tabPane = new TabPane();
         
         Tab gettab = new Tab();
-        gettab.setText("Get");
+        gettab.setText("Start");
         gettab.setClosable(false);
         gettab.setContent(GetTab.GetTab());
         tabPane.getTabs().add(gettab);  
@@ -49,10 +49,10 @@ public class BAM extends Application {
         tabPane.getTabs().add(namestab);
         
         
-        settab.setText("Start");
-        settab.setClosable(false);
-        settab.setDisable(true);
-        tabPane.getTabs().add(settab);
+     //   settab.setText("Start");
+     //   settab.setClosable(false);
+     //   settab.setDisable(true);
+     //   tabPane.getTabs().add(settab);
        
         scoretab.setText("Score");
         scoretab.setClosable(false);
