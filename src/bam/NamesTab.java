@@ -70,11 +70,11 @@ public class NamesTab {
 
             @Override
             public void handle(ActionEvent event) {
-                for (int i = 1; i <= BAM.tbls; i++){
+                for (int i = 1; i < BAM.tbls; i++){
                     BAM.teamnames[i] = fields[i].getText();
                 }
                 int namesentered = 0;
-                for(int i = 1; i <= BAM.tbls; i++) if ( BAM.teamnames[i] != null) namesentered++;
+                for(int i = 0; i < BAM.tbls; i++) if ( BAM.teamnames[i] != null) namesentered++;
                 ScoreTab.namesText.setText(namesentered + "/" + BAM.tbls + " names entered.");
             }
         });

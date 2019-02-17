@@ -124,8 +124,8 @@ public class DB {
     
     public static void uploadRoundData(Connection conn) throws SQLException{        
         int tbls = BAM.tbls;
-        int rnds = 12;
-        if(tbls == 11) rnds = 10;
+        int rnds = 14;
+        //if(tbls == 11) rnds = 10;
         int[][] roundtable;
         int rndno,tblno,ns,ew,hi,trndno;
         int row;
@@ -134,55 +134,25 @@ public class DB {
         PreparedStatement ps;
              
        
-        if(tbls == 11){
-            roundtable = new int[comparisons+1][6];// rows start from 1, cols start from 0    
-            row = 1;
-            for(rndno=1; rndno < 11; rndno++){
-                for(tblno=1; tblno <= tbls; tblno++){
-                    //EW number
-                    ew = tblno - (2*rndno);
-                    while (ew < 1) ew = ew + tbls;
-                    
-                    roundtable[row][0] = rndno;
-                    roundtable[row][1] = tblno;
-
-                    //NS number (same as table number)
-                    roundtable[row][2] = tblno;                   
-
-                    roundtable[row][3] = ew;
-
-                    //Low Board, High Board
-                    hi = (tblno - rndno) * 2;
-                    while (hi <= 0) hi = hi + (tbls * 2);
-                    while (hi > tbls*2) hi = hi - (tbls * 2);
-
-                    roundtable[row][4] = hi - 1;
-                    roundtable[row][5] = hi;
-                    
-                    row = row + 1;
-                    
-                    }
-                }
+        boolean bye = false;
+        if(tbls % 2 == 0){
+            comparisons -= rnds;                
+            bye = true;
+            tbls = tbls + 1;
         }
-        else if(tbls < 19){
-            boolean bye = false;
-            if(tbls % 2 == 0){
-                comparisons -= rnds;                
-                bye = true;
-                tbls = tbls + 1;
-            }
-            roundtable = new int[comparisons+1][6];// rows start from 1, cols start from 0  
+        
+        roundtable = new int[comparisons+1][6];// rows start from 1, cols start from 0  
         
                 
-                row = 1;
+        row = 1;
         
-        for(rndno=1; rndno < 13; rndno++){
+        for(rndno=1; rndno < 15; rndno++){
             for(tblno=1; tblno <= tbls; tblno++){
                     // "rndno" is the actual Round number in the tournament
                     // "trndno" is Theoretical round number ( used after Round 6 - The Big Move)
                     // "Theoretical round number" is what the round number would be if there were no skip after round 6.
-                    if(rndno < 7) trndno = rndno;
-                    else trndno = rndno + (tbls - 13);
+                    if(rndno < 8) trndno = rndno;
+                    else trndno = rndno + (tbls - 15);
                     
                     //NS, EW number
                     ns = tblno;
@@ -210,56 +180,8 @@ public class DB {
                     }
                 }
             }
-        }
-        else{
-            //No. of teams = 19 to 25. One board per round.
-            rnds = tbls - 1;
-            comparisons = rnds * tbls;
-            int maxrndno = tbls;
-            boolean bye = false;
-            if(tbls % 2 == 0){
-                comparisons -= rnds;                
-                bye = true;
-                tbls = tbls + 1;
-            }
-            roundtable = new int[comparisons+1][6];// rows start from 1, cols start from 0  
         
-                
-                row = 1;
-        
-        for(rndno=1; rndno < maxrndno; rndno++){
-            for(tblno=1; tblno <= tbls; tblno++){
-                                  
-                    //NS, EW number
-                    ns = tblno;
-                    ew = tblno - (2*rndno);
-                    while (ew < 1) ew = ew + tbls;
-                    
-                    if(!(bye && (ew == tbls || ns == tbls))){
-                    roundtable[row][0] = rndno;
-                    roundtable[row][1] = tblno;
-
-                    //NS number (same as table number)
-                    roundtable[row][2] = tblno;                   
-
-                    roundtable[row][3] = ew;
-
-                    //Low Board, High Board
-                    hi = (tblno - rndno) * 2;
-                    while (hi <= 0) hi = hi + (tbls * 2);
-                    while (hi > tbls*2) hi = hi - (tbls * 2);
-                   
-                    
-                    hi /= 2; //Since there's only one board per round.
-                    
-                    roundtable[row][4] = hi;
-                    roundtable[row][5] = hi;
-                    
-                    row = row + 1;
-                    }
-                }
-            }
-        }
+       
     tbls = BAM.tbls;
     try{
         int half = comparisons/2; //StackOverFlow Exception if the string is too long, hence splitting it up.

@@ -28,8 +28,8 @@ public class BAM extends Application {
    // public static Tab settab = new Tab();
     public static Tab scoretab = new Tab();
    // public static String dbpath = "C:\\users\\lenovo\\documents\\dchbam.bws";
-    public static String dbpath = "C:\\KBaM\\dchbam.bws";
-    public static String bmpropath = "C:\\Program Files (x86)\\Bridgemate Pro";
+    public static String dbpath = "C:\\BAM\\dchbam.bws";
+    public static String bmpropath = "C:\\Program Files\\Bridgemate Pro";
     public static int bds;
     @Override
     public void start(Stage primaryStage) {

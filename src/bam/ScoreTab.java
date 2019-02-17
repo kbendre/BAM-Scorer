@@ -47,11 +47,11 @@ public class ScoreTab {
     public static int round[];
     public static int nsscore[];
     public static int nsmp[];
+    public static float adjustedtotal[] = new float[BAM.tbls+2];
     //public static String compar[]; //for debugging
     
     //public static int noofScores = BAM.tbls * 28;
-    public static Text namesText;
-    
+    public static Text namesText;    
      
     public static GridPane ScoreTab () {
         GridPane grid = new GridPane();
@@ -86,6 +86,10 @@ public class ScoreTab {
         hbBtn.getChildren().add(scorebtn);
         grid.add(hbBtn, 0,5 );
         
+        Text scoreText = new Text();
+        scoreText.setText("Not scored.");
+        grid.add(scoreText, 0, 6);
+        
         retbtn.setOnAction(new EventHandler<ActionEvent>(){
             @Override
             public void handle(ActionEvent event) {
@@ -94,6 +98,7 @@ public class ScoreTab {
                 ret = retrieveScores();
                 ret = ret - removeDuplicates();                
                 retText.setText(ret + " scores retrieved.");   
+                scoreText.setText("Not scored.");
                 if(ret > 0) scorebtn.setDisable(false);
                 }
                 catch (Exception e) {
@@ -107,9 +112,11 @@ public class ScoreTab {
 
             @Override
             public void handle(ActionEvent event) {
-                try{           
+                try{                            
                     createRecap();           
-                    createReports();           
+                    createReports();        
+                    scoreText.setText("Scoring Complete");
+                    scorebtn.setDisable(true);
                 }
                 catch (Exception e) {
                     e.printStackTrace();
@@ -122,6 +129,11 @@ public class ScoreTab {
     }    
     
     public static int retrieveScores() throws ClassNotFoundException, SQLException{
+        
+      //  File f1;//debug
+      //  f1=new File("c:\\BAM\\BAM_debug_" + BAM.date + ".csv");//debug  
+      //  String str1 = "";//debug
+        
         int size = 0;
         try{
             Connection conn =DriverManager.getConnection("jdbc:ucanaccess://" + BAM.dbpath + ";memory=true");
@@ -186,12 +198,19 @@ public class ScoreTab {
                     dblstr[i] = str[2];
                 }          
                 
-                nsscore[i] = calculateRawScore(level[i], strain[i], made[i], decl[i], dblstr[i], board[i]);                               
+                if(level[i] == 0) nsscore[i] = 0; // all pass
+                else nsscore[i] = calculateRawScore(level[i], strain[i], made[i], decl[i], dblstr[i], board[i]); 
+            //    str1 += level[i] + " " + strain[i] + " " + made[i] + " " + nsscore[i];//debug
+             //   str1 += "\n";//debug
             }           
-        
+            
+          //  FileWriter fr1 = new FileWriter(f1);//debug
+          //  fr1.write(str1);//debug
+          //  fr1.close();//debug
+            
             conn.close();            
         }
-        catch (Exception e) {
+        catch (Exception e) {                        
 			e.printStackTrace();
 	}
 
@@ -254,31 +273,30 @@ public class ScoreTab {
         int totaly = BAM.bds + 2;
         int rank;
         int ranky = totaly + 1;
-        int namey = totaly - 1;
+        int playedboards = 0;
+        //int namey = totaly - 1;
         for(int i = 1; i <= BAM.tbls ; i++){
             total = 0;
             for(int j = 1; j <= xmax - 4 ; j++){
-                if(recap[i][j] != -1) total += recap[i][j];
+                if(recap[i][j] != -1) {
+                    total += recap[i][j];
+                    playedboards += 1;
+                }
             }
-            recap[i][0] = i;
+            recap[i][0] = i;            
             recap[i][totaly] = total;
+            adjustedtotal[i] = (playedboards == 26)? (float)total * 28 / 26 : total;
+            playedboards = 0;
             //recap[i][namey] = BAM.teamnames[i];            
         }
         for(int i = 1; i <= BAM.tbls; i++){
             rank = 1;
             for (int j = 1; j <= BAM.tbls; j++){
-                if(recap[i][totaly] < recap[j][totaly]) rank++ ;
+               // if(recap[i][totaly] < recap[j][totaly]) rank++ ;
+                if(adjustedtotal[i] < adjustedtotal[j]) rank++ ;
             }
             recap[i][ranky] = rank;
-        }
-        
-        ///sort by rank
-        //int[][] copy = recap;
-        
-        
-        
-        
-        //////////
+        }      
     }
     
     public static void createReports() throws IOException {
@@ -286,24 +304,31 @@ public class ScoreTab {
         String row = "<tr><td>";
         String rowend = "</td></tr>";
         File f;
-        f=new File("c:\\KBaM\\BAM_results_" + BAM.date + ".htm");  
-        String strLine, str = "";
+        f = new File("c:\\BAM\\BAM_results_" + BAM.date + ".htm");
+        String str;
         File f1;
-        f1=new File("c:\\KBaM\\BAM_results_" + BAM.date + ".csv");  
-        String str1 = "";
-        str = "<html>\n<style>\n table, th, td { \n" +
-                "border-collapse: collapse;\n" +
-                " border: 1px solid black; \n" +
-                " padding: 8px;\n" +
-                "font-family: arial, sans-serif;\n" +
-                " font-size: 80%;\n" +
-                " }  </style> ";
-        
+        f1 = new File("c:\\BAM\\BAM_results_" + BAM.date + ".csv");
+        String str1;
+        str = "<html>\n<style>\n table, th, td { \n"
+                + "border-collapse: collapse;\n"
+                + " border: 1px solid black; \n"
+                + " padding: 8px;\n"
+                + "font-family: arial, sans-serif;\n"
+                + " font-size: 80%;\n"
+                + " }  </style> ";
+
         str += "<h3>" + BAM.nameOfEvent + "</h3> \n\n";
         str += "<h4>" + BAM.date + "</h4>\n\n";
+
+        if (BAM.tbls % 2 == 0) {
+            str += "<table><tr><th>No.</th><th>Name</th><th>Adj Score</th><th>Rank</th><th>Raw Score</th>";
+            str1 = "No.,Name,Adj Score,Rank, Raw Score";
+        } else {
+            str += "<table><tr><th>No.</th><th>Name</th><th>Score</th><th>Rank</th>";
+            str1 = "No.,Name,Score,Rank";
+        }
         
-        str += "<table><tr><th>No.</th><th>Name</th><th>Score</th><th>Rank</th>";
-        str1 = "No.,Name,Score,Rank";
+       
         for(int i = 1; i <= BAM.bds ; i++){
             str += "<th>" + i + "</th>";
             str1 += "," + i;
@@ -314,47 +339,53 @@ public class ScoreTab {
         int max_y = BAM.bds;
         int max_x = BAM.tbls;
         
-        try{
+        try {
             f.createNewFile();
             f1.createNewFile();
             boolean match = false;
             int counter = 1;
             int rank = 1;
-            while (counter <= max_x){//All these loops in order to sort ouput by rank
+            while (counter <= max_x) {//All these loops in order to sort ouput by rank
                 match = false;
-                for(int i = 1; i<= max_x; i++){
-                    if(recap[i][max_y+3] == rank){ 
+                for (int i = 1; i <= max_x; i++) {
+                    if (recap[i][max_y + 3] == rank) {
+                        if (BAM.tbls % 2 == 0) {
+                            str += row + i + td + BAM.teamnames[i] + td + adjustedtotal[i] + td + recap[i][max_y + 3] + td + recap[i][max_y + 2];
+                            str1 += i + "," + BAM.teamnames[i] + "," + adjustedtotal[i] + "," + recap[i][max_y + 3] + "," + recap[i][max_y + 2];
+                        } else {
+                            str += row + i + td + BAM.teamnames[i] + td + recap[i][max_y + 2] + td + recap[i][max_y + 3];
+                            str1 += i + "," + BAM.teamnames[i] + "," + recap[i][max_y + 2] + "," + recap[i][max_y + 3];
+                        }
 
-                    str += row + i + td + BAM.teamnames[i] + td + recap[i][max_y + 2] + td + recap[i][max_y + 3];
-                    str1 += i + "," + BAM.teamnames[i] + "," + recap[i][max_y + 2] + "," + recap[i][max_y + 3];
-                    for(int j = 1; j <= max_y; j++){
-                        if(recap[i][j] == -1) {
-                            str += td + "";
-                            str1 += ",";
+                        for (int j = 1; j <= max_y; j++) {
+                            if (recap[i][j] == -1) {
+                                str += td + "";
+                                str1 += ",";
+                            } else {
+                                str += td + recap[i][j];
+                                str1 += "," + recap[i][j];
+                            }
                         }
-                        else {
-                            str += td + recap[i][j];
-                            str1 += "," + recap[i][j];
-                        }
-                    }
-                    //str += row + id[i] + td + pairns[i] + td + pairew[i] + td + nsscore[i] + td + nsmp[i] + td + compar[i];
-                    str += rowend;
-                    str1 += "\n";
-                    match = true;
-                    recap[i][max_y+3] = -1;
-                    counter++;
+                        //str += row + id[i] + td + pairns[i] + td + pairew[i] + td + nsscore[i] + td + nsmp[i] + td + compar[i];
+                        str += rowend;
+                        str1 += "\n";
+                        match = true;
+                        recap[i][max_y + 3] = -1;
+                        counter++;
                     }
                 }
-                if (match == false) rank++;
+                if (match == false) {
+                    rank++;
+                }
             }
             
             
             str += "</table></html>";
             FileWriter fr = new FileWriter(f);
             fr.write(str);
-             FileWriter fr1 = new FileWriter(f1);
+            FileWriter fr1 = new FileWriter(f1);
             fr1.write(str1);
-            
+
             fr.close();
             fr1.close();
         }
@@ -421,8 +452,10 @@ public class ScoreTab {
             NSScoreconverter = -1;
         }
         ////////// overtricks
-        if (made.length() == 0) return 0; // passed out
-        
+       // if (made.length() == 0) return 0; // passed out
+       //if("".equals(made)) return 0; // passed out 
+       
+       
         if (made.startsWith("-")) ot = Integer.parseInt(made.substring(1)) * -1;
         else if (made.startsWith("=")) ot = 0;
         else ot = Integer.parseInt(made.substring(1));

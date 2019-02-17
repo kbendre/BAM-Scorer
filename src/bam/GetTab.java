@@ -5,6 +5,7 @@
  */
 package bam;
 
+//import java.io.File;
 import java.time.LocalDate;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -20,6 +21,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+//import javafx.stage.DirectoryChooser;
 
 /**
  *
@@ -54,7 +56,7 @@ public class GetTab {
         Label noOfTeamslabel = new Label("Number of Teams:");
         grid.add(noOfTeamslabel, 0, 3);
 
-        Spinner<Integer> noofteamsSpinner = new Spinner(11,26,12);
+        Spinner<Integer> noofteamsSpinner = new Spinner(14,31,15);
         grid.add(noofteamsSpinner, 1, 3);
         
         Button btn = new Button();
@@ -81,7 +83,7 @@ public class GetTab {
             public void handle(ActionEvent event)  {
                 try{
                 DB.initiateDB();                   
-                Process process = new ProcessBuilder(BAM.bmpropath + "\\BMPro.exe","/f:[" + BAM.dbpath + "]/s").start();             
+                Process process = new ProcessBuilder(BAM.bmpropath + "\\BMPro.exe","/f:[" + BAM.dbpath + "]").start();             
                 }
                 catch (Exception e) {
 			e.printStackTrace();
@@ -98,7 +100,7 @@ public class GetTab {
                 BAM.nameOfEvent = nameOfEventTextField.getText();
                 BAM.date = datePicker.getValue();
                 BAM.tbls = noofteamsSpinner.getValue();
-                BAM.bds = (BAM.tbls > 18) ? BAM.tbls : BAM.tbls * 2;
+                BAM.bds = (BAM.tbls % 2 == 0) ? BAM.tbls * 2 + 2 : BAM.tbls * 2;
                 //BAM.bmpropath = pathTextField.getText();
                 BAM.teamnames = new String[BAM.tbls+1];
                 
